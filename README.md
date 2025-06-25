@@ -4,7 +4,7 @@
 
 ```bash
 # Clone the repository
-git clon git@github.com:speedandfunction/ApostropheCMS-MCP.git
+git clone git@github.com:speedandfunction/ApostropheCMS-MCP.git
 cd ApostropheCMS-MCP
 
 # Install dependencies

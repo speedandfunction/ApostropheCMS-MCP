@@ -15,6 +15,7 @@ npm i
 
 Go to WindSurf AI settings and add the following configuration to the `ModelContextProtocol` section:
 
+```
 {
   "mcpServers": {
     "apostrophe-cms": {
@@ -26,6 +27,7 @@ Go to WindSurf AI settings and add the following configuration to the `ModelCont
     }
   }
 }
+```
 
 This config file could be placed in the 
 /Users/[YOUR_USERNAME]/.codeium/windsurf/mcp_config.json

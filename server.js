@@ -79,6 +79,37 @@ class ApostropheCMSServer {
               required: ['query'],
             },
           },
+          {
+            name: 'create_apostrophe_snippet',
+            description: 'Create a new ApostropheCMS snippet with metadata',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  description: 'Type of snippet (widget, piece, page)',
+                  enum: ['widget', 'piece', 'page']
+                },
+                title: {
+                  type: 'string',
+                  description: 'Title of the snippet'
+                },
+                description: {
+                  type: 'string',
+                  description: 'Description of the snippet'
+                },
+                code: {
+                  type: 'string',
+                  description: 'The actual code content of the snippet'
+                },
+                name: {
+                  type: 'string',
+                  description: 'Name of the snippet file (without extension)'
+                }
+              },
+              required: ['type', 'title', 'description', 'code', 'name']
+            },
+          },
         ],
       };
     });
@@ -94,6 +125,8 @@ class ApostropheCMSServer {
             return await this.listSnippets(args.category);
           case 'search_apostrophe_snippets':
             return await this.searchSnippets(args.query);
+          case 'create_apostrophe_snippet':
+            return await this.createSnippet(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -258,6 +291,46 @@ class ApostropheCMSServer {
       throw new Error(`Snippet '${name}' not found`);
     }
     return found;
+  }
+
+  async createSnippet({ type, title, description, code, name }) {
+    const targetDir = path.join(SNIPPETS_DIR, `${type}s`);
+    const snippetPath = path.join(targetDir, `${name}.js`);
+
+    try {
+      // Ensure the directory exists
+      await fs.mkdir(targetDir, { recursive: true });
+
+      // Check if file already exists
+      try {
+        await fs.access(snippetPath);
+        throw new Error(`Snippet '${name}' already exists in ${type}s directory`);
+      } catch (err) {
+        // File doesn't exist, which is what we want
+      }
+
+      // Format the content with metadata
+      const content = [
+        `// @title ${title}`,
+        `// @description ${description}`,
+        '',
+        code
+      ].join('\n');
+
+      // Write the file
+      await fs.writeFile(snippetPath, content, 'utf-8');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created snippet: ${snippetPath}\n\n\`\`\`javascript\n${content}\n\`\`\``,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to create snippet: ${error.message}`);
+    }
   }
 
   async getSnippetMetadata(snippetPath) {

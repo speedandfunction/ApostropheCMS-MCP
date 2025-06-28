@@ -120,13 +120,9 @@ class ApostropheCMSServer {
                 projectPath: {
                   type: 'string',
                   description: 'Path where to create the project'
-                },
-                adminPassword: {
-                  type: 'string',
-                  description: 'Password for the admin user'
                 }
               },
-              required: ['projectPath', 'adminPassword']
+              required: ['projectPath']
             },
           },
         ],
@@ -388,7 +384,7 @@ class ApostropheCMSServer {
     console.error('ApostropheCMS MCP server running on stdio');
   }
 
-  async createProject({ projectPath, adminPassword }) {
+  async createProject({ projectPath }) {
     try {
       // Clone the starter kit
       execSync(`git clone https://github.com/apostrophecms/starter-kit-essentials ${projectPath}`, {
@@ -408,14 +404,14 @@ Next steps:
 2. Install dependencies:
    npm install
 
-3. Create admin user:
+3. Create admin user (you'll be prompted for password):
    node app @apostrophecms/user:add admin admin
-   (You'll be prompted for a password)
 
 4. Start the development server:
    npm run dev
 
-Once started, access the admin area at: http://localhost:3000/login`
+Once started, access the admin area at: http://localhost:3000/login
+Username: admin`
           }
         ]
       };

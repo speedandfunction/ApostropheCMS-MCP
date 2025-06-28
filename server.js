@@ -8,6 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { execSync, spawn } from 'child_process';
 
 // Configuration
 const SNIPPETS_DIR = process.env.APOSTROPHE_SNIPPETS_DIR || './apostrophe-snippets';
@@ -110,6 +111,24 @@ class ApostropheCMSServer {
               required: ['type', 'title', 'description', 'code', 'name']
             },
           },
+          {
+            name: 'create_apostrophe_project',
+            description: 'Create a new ApostropheCMS project from starter-kit-essentials',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                projectPath: {
+                  type: 'string',
+                  description: 'Path where to create the project'
+                },
+                adminPassword: {
+                  type: 'string',
+                  description: 'Password for the admin user'
+                }
+              },
+              required: ['projectPath', 'adminPassword']
+            },
+          },
         ],
       };
     });
@@ -127,6 +146,8 @@ class ApostropheCMSServer {
             return await this.searchSnippets(args.query);
           case 'create_apostrophe_snippet':
             return await this.createSnippet(args);
+          case 'create_apostrophe_project':
+            return await this.createProject(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -365,6 +386,42 @@ class ApostropheCMSServer {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     console.error('ApostropheCMS MCP server running on stdio');
+  }
+
+  async createProject({ projectPath, adminPassword }) {
+    try {
+      // Clone the starter kit
+      execSync(`git clone https://github.com/apostrophecms/starter-kit-essentials ${projectPath}`, {
+        stdio: 'inherit'
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `ApostropheCMS project cloned successfully!
+
+Next steps:
+1. Open terminal and navigate to the project:
+   cd ${projectPath}
+
+2. Install dependencies:
+   npm install
+
+3. Create admin user:
+   node app @apostrophecms/user:add admin admin
+   (You'll be prompted for a password)
+
+4. Start the development server:
+   npm run dev
+
+Once started, access the admin area at: http://localhost:3000/login`
+          }
+        ]
+      };
+    } catch (error) {
+      throw new Error(`Failed to create ApostropheCMS project: ${error.message}`);
+    }
   }
 }
 
